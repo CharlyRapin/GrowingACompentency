@@ -8,7 +8,7 @@ import ballUrl from './3DAsset/tennis_ball.glb?url';
 // create the scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
-let ballMesh = null; 
+let ballMesh = null;
 
 // add the camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -18,6 +18,10 @@ const container = document.getElementById('threejs-container');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+
+// Add shadow
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 container.appendChild(renderer.domElement);
 
@@ -42,6 +46,12 @@ loader.load(
     courtUrl,
     (gltf) => {
         const court = gltf.scene;
+        // Make the court receive shadows
+        court.traverse((child) => {
+            if (child.isMesh) {
+                child.receiveShadow = true;
+            }
+        });
         scene.add(court);
     },
     undefined,
@@ -57,6 +67,14 @@ loader.load(
         // move the ball to its intial position, scale the ball to it correct size
         ball.position.set(2, 0.2, 2);
         ball.scale.set(0.15, 0.15, 0.15);
+
+        // Make the ball cast shadows
+        ball.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+            }
+        });
+
         scene.add(ball);
         ballMesh = ball;
 
@@ -95,15 +113,15 @@ function animate(time) {
 
         // create an arc for the ball to travel 
         if (shotProgress < 0.85) {
-            
-            const p = shotProgress / 0.85; 
-            const baseH = 1.5 * (1 - p) + 0.2 * p; 
-            const arcH = 4 * p * (1 - p) * 3; 
+
+            const p = shotProgress / 0.85;
+            const baseH = 1.5 * (1 - p) + 0.2 * p;
+            const arcH = 4 * p * (1 - p) * 3;
             y = baseH + arcH;
         } else {
-            const p = (shotProgress - 0.85) / 0.15; 
-            const baseH = 0.2 * (1 - p) + 1.5 * p; 
-            const arcH = 4 * p * (1 - p) * 1.5; 
+            const p = (shotProgress - 0.85) / 0.15;
+            const baseH = 0.2 * (1 - p) + 1.5 * p;
+            const arcH = 4 * p * (1 - p) * 1.5;
             y = baseH + arcH;
         }
 
