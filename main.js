@@ -8,6 +8,7 @@ import ballUrl from './3DAsset/tennis_ball.glb?url';
 // create the scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
+let ballMesh = null; 
 
 // add the camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -57,16 +58,58 @@ loader.load(
         ball.position.set(2, 0.2, 2);
         ball.scale.set(0.15, 0.15, 0.15);
         scene.add(ball);
+        ballMesh = ball;
 
     },
     undefined,
     (error) => console.error('Error loading tennis ball:', error)
 );
 
+
+const rallyDuration = 2000; // how long the ball is in the air for
 // This is where the animation occurs
-function animate() {
+function animate(time) {
     requestAnimationFrame(animate);
-    controls.update(); // required if damping enabled
+    controls.update();
+
+    if (ballMesh && time) {
+
+        // check which side the ball is on
+        const shotProgress = (time % rallyDuration) / rallyDuration; // 0 to 1
+
+        // determine direction based on which rally we are in
+        const isGoingRight = Math.floor(time / rallyDuration) % 2 === 0;
+
+        // Z axis 
+        const zStart = isGoingRight ? -12 : 12;
+        const zEnd = isGoingRight ? 12 : -12;
+        ballMesh.position.z = zStart + (zEnd - zStart) * shotProgress;
+
+        // X axis 
+        const xStart = isGoingRight ? -3 : 3;
+        const xEnd = isGoingRight ? 3 : -3;
+        ballMesh.position.x = xStart + (xEnd - xStart) * shotProgress;
+
+        // Y axis 
+        let y = 0.2;
+
+        // create an arc for the ball to travel 
+        if (shotProgress < 0.85) {
+            
+            const p = shotProgress / 0.85; 
+            const baseH = 1.5 * (1 - p) + 0.2 * p; 
+            const arcH = 4 * p * (1 - p) * 3; 
+            y = baseH + arcH;
+        } else {
+            const p = (shotProgress - 0.85) / 0.15; 
+            const baseH = 0.2 * (1 - p) + 1.5 * p; 
+            const arcH = 4 * p * (1 - p) * 1.5; 
+            y = baseH + arcH;
+        }
+
+        ballMesh.position.y = y;
+    }
+
     renderer.render(scene, camera);
 }
 animate();
