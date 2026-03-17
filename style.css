@@ -15,3 +15,45 @@ html {
     height: 100vh;
     display: block;
 }
+
+/* Introduction Section Overlay */
+#intro-container {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    z-index: 10;
+    pointer-events: none;
+
+    /* animation for the text */
+    animation: fadeInDown 1s ease-out;
+}
+
+/*Text goes from invisible to visible, it also moves down*/
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Footer Overlay */
+#footer-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    z-index: 10;
+    pointer-events: none;
+
+}
+
